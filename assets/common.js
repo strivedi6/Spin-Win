@@ -4,34 +4,68 @@
 const T = W.TCO = {};
 
 /* ---------------- server (Google Apps Script web app) ---------------- */
+// Normal path: fetch (GET / POST). If the browser blocks it (e.g. CORS on a redirect), fall back to
+// JSONP (a <script> tag), which is what the original USB screen used, and remember that choice.
 T.API = ((W.SPIN_CONFIG && W.SPIN_CONFIG.API) || "").trim();
+const TKEY = "tco_transport";
+let transport = "fetch"; try { transport = localStorage.getItem(TKEY) || "fetch"; } catch(e){}
+const useJsonp = () => { transport = "jsonp"; try { localStorage.setItem(TKEY, "jsonp"); } catch(e){} };
 function withTimeout(ms){ const c = new AbortController(); const t = setTimeout(() => c.abort(), ms); return { signal: c.signal, done: () => clearTimeout(t) }; }
-T.get = async function (data, ms) {
-  if (!T.API) throw new Error("noapi");
+let jn = 0;
+function jsonp(data, ms){
+  return new Promise((res, rej) => {
+    const cb = "__tcoCb" + (++jn) + Date.now(), s = document.createElement("script");
+    let done = false;
+    const end = (err, v) => { if (done) return; done = true; clearTimeout(t); try { delete W[cb]; } catch(e){} s.remove(); err ? rej(err) : res(v); };
+    W[cb] = v => end(null, v);
+    s.onerror = () => end(new Error("unreachable"));
+    s.onload = () => setTimeout(() => end(new Error("badreply")), 50);
+    const t = setTimeout(() => end(new Error("timeout")), ms || 25000);
+    s.src = T.API + (T.API.includes("?") ? "&" : "?") + "callback=" + cb + "&d=" + encodeURIComponent(JSON.stringify(data));
+    document.head.appendChild(s);
+  });
+}
+async function fetchJSON(url, opt, ms){
   const t = withTimeout(ms || 25000);
   try {
-    const r = await fetch(T.API + "?d=" + encodeURIComponent(JSON.stringify(data)), { signal: t.signal, cache: "no-store", redirect: "follow" });
+    const r = await fetch(url, Object.assign({ signal: t.signal, redirect: "follow" }, opt));
     if (!r.ok) throw new Error("http" + r.status);
-    return await r.json();
-  } catch (e) { throw new Error(e.name === "AbortError" ? "timeout" : (e.message || "unreachable")); }
+    const txt = await r.text();
+    try { return JSON.parse(txt); } catch(e){ throw new Error(/function not found|doPost/i.test(txt) ? "oldscript" : "badreply"); }
+  } catch(e){ throw new Error(e.name === "AbortError" ? "timeout" : (e.message || "unreachable")); }
   finally { t.done(); }
+}
+const SMALL = 6000;   // JSONP sends data in the link, so only small requests can use it
+T.get = async function (data, ms) {
+  if (!T.API) throw new Error("noapi");
+  if (transport !== "jsonp"){
+    try { return await fetchJSON(T.API + "?d=" + encodeURIComponent(JSON.stringify(data)), { cache: "no-store" }, ms); }
+    catch(e){ if (e.message === "timeout" || e.message === "oldscript") throw e; }
+    const r = await jsonp(data, ms); useJsonp(); return r;
+  }
+  return jsonp(data, ms);
 };
 T.post = async function (data, ms) {
   if (!T.API) throw new Error("noapi");
-  const t = withTimeout(ms || 30000);
-  try {
-    // text/plain body = no CORS pre-flight, works with Apps Script
-    const r = await fetch(T.API, { method: "POST", body: JSON.stringify(data), signal: t.signal, redirect: "follow" });
-    if (!r.ok) throw new Error("http" + r.status);
-    return await r.json();
-  } catch (e) { throw new Error(e.name === "AbortError" ? "timeout" : (e.message || "unreachable")); }
-  finally { t.done(); }
+  const small = encodeURIComponent(JSON.stringify(data)).length < SMALL;
+  if (transport !== "jsonp" || !small){
+    try { return await fetchJSON(T.API, { method: "POST", body: JSON.stringify(data) }, ms); }   // text/plain = no pre-flight
+    catch(e){
+      if (e.message === "timeout" || e.message === "oldscript") throw e;
+      if (!small) throw new Error("bigblocked");
+    }
+    const r = await jsonp(data, ms); useJsonp(); return r;
+  }
+  return jsonp(data, ms);
 };
 T.errText = function (e) {
   const m = e && e.message || String(e);
   if (m === "noapi") return "The Google Sheet link is missing in config.js.";
   if (m === "timeout") return "Google took too long to answer. Please try again.";
-  if (/^http|Failed to fetch|NetworkError|unreachable|Load failed/i.test(m)) return "Can't reach the Google Sheet. Check the internet connection and the web app link in config.js.";
+  if (m === "oldscript") return "Your Google Sheet is still running the old script. Paste the new Code.gs, run setup, then Deploy → Manage deployments → ✏️ → New version → Deploy.";
+  if (m === "bigblocked") return "Large uploads are blocked by Google for this link. Add the file in the Drive folder instead.";
+  if (m === "badreply") return "Google answered, but not from the Spin & Win script. Check the web app link in config.js and that access is set to \"Anyone\".";
+  if (/^http|Failed to fetch|NetworkError|unreachable|Load failed/i.test(m)) return "Can't reach the Google Sheet. Check the internet connection, the web app link in config.js, and that the web app access is \"Anyone\".";
   return m;
 };
 

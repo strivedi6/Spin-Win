@@ -1,6 +1,6 @@
 /* Keeps the lobby screen working if the internet drops: the page and its files are cached.
    Always tries the network first, so updates you push to GitHub arrive automatically. */
-const CACHE = "tco-spin-v1";
+const CACHE = "tco-spin-v2";
 const SHELL = ["./", "index.html", "config.js", "manifest.webmanifest",
   "assets/common.js", "assets/common.css", "assets/logo.png", "assets/icon-192.png", "assets/icon-512.png",
   "assets/fonts/jost-latin-400-normal.woff2", "assets/fonts/jost-latin-500-normal.woff2", "assets/fonts/jost-latin-600-normal.woff2",
