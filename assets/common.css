@@ -1,0 +1,38 @@
+/* Together & Co. — shared fonts + voucher card (used by index.html and admin.html) */
+@font-face{font-family:"Jost";font-style:normal;font-weight:400;font-display:swap;src:url(fonts/jost-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Jost";font-style:normal;font-weight:500;font-display:swap;src:url(fonts/jost-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"Jost";font-style:normal;font-weight:600;font-display:swap;src:url(fonts/jost-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Playfair Display";font-style:normal;font-weight:500;font-display:swap;src:url(fonts/playfair-display-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:"Playfair Display";font-style:italic;font-weight:500;font-display:swap;src:url(fonts/playfair-display-latin-500-italic.woff2) format("woff2")}
+
+:root{
+  --linen:#EEEAE9; --mist:#D7D8D4; --sand:#D6CFBC; --blush:#D0A9A0; --olive:#B0AA54; --ink:#211F1B;
+  --serif:"Playfair Display", Georgia, serif;
+  --sans:"Jost", "Century Gothic", system-ui, sans-serif;
+}
+
+/* ---------- voucher card (designed at 880 px wide; scale with transform) ---------- */
+.vcard{width:880px;background:#FBFAF9;border-radius:40px;overflow:hidden;box-shadow:0 34px 80px rgba(33,31,27,.22);text-align:center;color:var(--ink);font-family:var(--sans)}
+.vtop{background:var(--linen);padding:0 50px 46px;position:relative}
+.vbar{height:20px;margin:0 -50px 44px}
+.vlogo{height:118px;width:auto;max-width:330px;object-fit:contain}
+.vgift{font:500 24px/1 var(--sans);letter-spacing:.42em;color:#6d6a63;margin-top:34px}
+.vname{font:italic 500 74px/1.1 var(--serif);margin-top:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vamp{display:flex;align-items:center;gap:26px;justify-content:center;margin:14px 0 4px}
+.vamp span{height:2px;width:220px;background:#cfc9c3}
+.vamp i{font:italic 500 54px/1 var(--serif)}
+.vtitle{font:500 128px/1.02 var(--serif);letter-spacing:-.01em}
+.vsub{font:400 40px/1.25 var(--sans);margin-top:10px}
+.vperf{position:relative;height:0;border-top:3px dashed #d6d0ca;margin:0 46px}
+.vperf::before,.vperf::after{content:"";position:absolute;top:-38px;width:72px;height:72px;border-radius:50%;background:var(--vperf-bg,#EAE6E3)}
+.vperf::before{left:-84px}.vperf::after{right:-84px}
+.vbot{padding:40px 60px 46px}
+.vlabel{font:500 22px/1 var(--sans);letter-spacing:.36em;color:#6d6a63}
+.vcode{display:inline-block;margin-top:16px;background:var(--ink);color:var(--linen);border-radius:999px;padding:24px 56px;font:600 50px/1 var(--sans);letter-spacing:.2em}
+.vvalid{font:500 36px/1.3 var(--sans);margin-top:24px}
+.vissued{font:400 26px/1.3 var(--sans);color:#6d6a63;margin-top:6px}
+.vterms{text-align:left;margin-top:30px;border-top:1px solid #e6e1dd;padding-top:22px}
+.vterms b{display:block;text-align:center;font:600 21px/1 var(--sans);letter-spacing:.3em;margin-bottom:14px}
+.vterms ul{margin:0;padding:0}
+.vterms li{font:400 22px/1.38 var(--sans);color:#4a4741;margin:0 0 6px 26px}
+.vstamp{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-14deg);border:8px solid #8a3a2e;color:#8a3a2e;border-radius:18px;padding:14px 36px;font:600 70px/1 var(--sans);letter-spacing:.14em;opacity:.85;background:rgba(251,250,249,.7)}

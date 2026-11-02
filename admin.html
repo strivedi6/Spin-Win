@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#211F1B">
+<meta name="robots" content="noindex">
+<title>Spin &amp; Win Admin — Together &amp; Co.</title>
+<link rel="icon" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="stylesheet" href="assets/common.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font:15px/1.5 var(--sans);color:var(--ink);background:#F4F1EF;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+h1,h2,h3{font-family:var(--serif);font-weight:500}
+.muted{color:#77736b;font-size:13px}
+.hide{display:none!important}
+
+/* ---------- login ---------- */
+#login{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(900px 700px at 50% 30%, #F8F6F4, #ECE7E3)}
+.loginBox{width:100%;max-width:380px;background:#fff;border-radius:24px;padding:36px 28px 30px;text-align:center;box-shadow:0 20px 60px rgba(33,31,27,.12)}
+.loginBox img{height:84px;margin-bottom:18px}
+.loginBox h1{font-size:28px}
+.loginBox input{width:100%;margin-top:22px;padding:14px;border:1px solid #d6d1cc;border-radius:12px;text-align:center;font-size:24px;letter-spacing:.4em}
+.loginBox .err{color:#B4483A;min-height:22px;margin-top:10px;font-size:14px}
+
+/* ---------- shell ---------- */
+#app{min-height:100vh}
+.side{position:fixed;inset:0 auto 0 0;width:248px;background:var(--ink);color:var(--linen);display:flex;flex-direction:column;padding:22px 16px;z-index:20}
+.side .brand{display:flex;align-items:center;gap:12px;padding:0 6px 22px;border-bottom:1px solid #3a372f}
+.side .brand span{background:var(--linen);border-radius:12px;padding:6px 8px;display:flex}
+.side .brand img{height:34px}
+.side .brand b{font:500 20px/1.1 var(--serif);white-space:nowrap}
+.side .brand b small{display:block;font:600 11px/1.4 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--olive);margin-top:3px}
+.nav{display:flex;flex-direction:column;gap:4px;margin-top:18px}
+.nav button{display:flex;align-items:center;gap:12px;border:0;background:none;color:#cfc9bf;padding:11px 12px;border-radius:12px;cursor:pointer;text-align:left;font-weight:500}
+.nav button svg{width:20px;height:20px;flex:none}
+.nav button:hover{background:#2c2a25;color:#fff}
+.nav button.on{background:var(--olive);color:var(--ink)}
+.side .foot{margin-top:auto;font-size:13px;color:#a9a397;display:flex;flex-direction:column;gap:10px}
+.side .foot button{border:1px solid #4a463d;background:none;color:#cfc9bf;border-radius:10px;padding:9px 12px;cursor:pointer}
+.main{margin-left:248px;padding:28px 32px 120px;max-width:1280px}
+.top{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+.top h1{font-size:30px;flex:1;min-width:200px}
+.mtop{display:none}
+.bnav{display:none}
+
+/* ---------- elements ---------- */
+.card{background:#fff;border-radius:18px;padding:20px 22px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(33,31,27,.04);margin-bottom:18px}
+.card h2{font-size:21px;margin-bottom:4px}
+.card h3{font:600 12px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:#6d6a63;margin:18px 0 10px}
+.grid{display:grid;gap:18px}
+.grid>*{min-width:0}
+.dates{display:flex;gap:8px;align-items:center;min-width:0}.dates input{flex:1;min-width:0}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:18px}
+.kpi{background:#fff;border-radius:16px;padding:16px 18px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.kpi b{display:block;font:600 30px/1.1 var(--sans)}
+.kpi span{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6d6a63}
+.kpi.olive{background:var(--olive)}.kpi.olive span{color:#3b3a1d}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--ink);background:#fff;color:var(--ink);border-radius:12px;padding:10px 16px;font-weight:500;cursor:pointer;white-space:nowrap;text-decoration:none;font-size:14px}
+.btn.pri{background:var(--ink);color:#fff}
+.btn.olive{background:var(--olive);border-color:var(--olive)}
+.btn.danger{border-color:#B4483A;color:#B4483A}
+.btn.sm{padding:6px 10px;font-size:12px;border-radius:9px}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+input[type=text],input[type=search],input[type=number],input[type=date],input[type=time],input[type=password],input[type=tel],select,textarea{
+  padding:10px 12px;border:1px solid #d6d1cc;border-radius:11px;background:#fff;width:100%;outline:none;min-height:42px}
+input:focus,select:focus,textarea:focus{border-color:var(--ink)}
+textarea{min-height:150px;resize:vertical;line-height:1.45}
+label.f{display:block;font-size:13px;font-weight:500;color:#4a4741;margin:12px 0 5px}
+.sw{position:relative;display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-weight:500}
+.sw input{appearance:none;width:44px;height:26px;border-radius:999px;background:#d6d1cc;position:relative;transition:.2s;flex:none;cursor:pointer}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw input:checked{background:var(--olive)}.sw input:checked::after{left:21px}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.pill.Active{background:#EEF0D8;color:#5f5a1e}.pill.Redeemed{background:#E9E6E3;color:#5c5953}.pill.Expired{background:#F6E2DE;color:#8a3a2e}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid #d6d1cc;background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:500}
+.chips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.status{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;font-size:14px}
+.status i{width:10px;height:10px;border-radius:50%;flex:none}
+.status.ok{background:#EEF0D8}.status.ok i{background:#5f9a2e;box-shadow:0 0 0 4px rgba(95,154,46,.18)}
+.status.bad{background:#F6E2DE}.status.bad i{background:#B4483A}
+.note{background:#FBF1D9;border:1px solid #E8D29A;border-radius:12px;padding:10px 12px;font-size:14px;margin-top:12px}
+.empty{padding:30px;text-align:center;color:#77736b}
+
+/* tables → cards on small screens */
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#6d6a63;padding:10px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff}
+.tbl td{padding:11px 10px;border-bottom:1px solid #f2efec;vertical-align:middle}
+.tbl tr:hover td{background:#faf9f7}
+.tblWrap{overflow:auto;max-height:640px;border-radius:12px}
+.vcards{display:none}
+.vc{background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.vc .h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.vc .code{font-weight:600;letter-spacing:.08em}
+.vc .n{font-size:16px;font-weight:500;margin-top:6px}
+.vc .d{font-size:13px;color:#6d6a63;margin-top:2px}
+.vc .a{display:flex;gap:8px;margin-top:12px}
+.vc .a .btn{flex:1}
+
+/* bars */
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:130px 1fr 34px;gap:10px;align-items:center;font-size:14px}
+.bar .t{height:12px;background:#f0ece8;border-radius:6px;overflow:hidden}
+.bar .t i{display:block;height:100%;border-radius:6px}
+
+/* quick redeem */
+.qr{display:flex;gap:10px}
+.qr input{text-transform:uppercase;letter-spacing:.12em;font-weight:600}
+.qres{margin-top:14px}
+.qcard{border:1px solid #ece7e2;border-radius:14px;padding:14px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.qcard .who{flex:1;min-width:180px}
+.qcard .who b{font-size:17px}
+
+/* awards editor */
+.prize{border:1px solid #ece7e2;border-radius:16px;padding:14px;margin-top:12px;display:grid;grid-template-columns:130px 1fr;gap:14px}
+.prize.off{opacity:.55}
+.prize .swc{border-radius:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:10px;font:600 13px/1.2 var(--sans);letter-spacing:.06em;min-height:100px}
+.prize .swc small{font-weight:500;font-size:10px;letter-spacing:.1em;opacity:.8;margin-top:4px}
+.prize .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:2px 12px}
+.colors{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.colors .c{width:30px;height:30px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;cursor:pointer;padding:0}
+.colors .c.on{box-shadow:0 0 0 2px var(--ink)}
+.colors input[type=color]{width:36px;height:32px;border:0;padding:0;background:none;min-height:0}
+.wprev{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+#wheelPrev{width:240px;height:240px;border-radius:50%;box-shadow:0 0 0 8px var(--ink);flex:none}
+
+/* slideshow list */
+.media{display:grid;grid-template-columns:72px 1fr auto;gap:14px;align-items:center;border:1px solid #ece7e2;border-radius:14px;padding:10px;margin-top:10px}
+.media.off{opacity:.55}
+.media .th{width:72px;height:110px;border-radius:10px;overflow:hidden;background:#2a2824;display:grid;place-items:center;color:#aaa;font-size:11px}
+.media .th img{width:100%;height:100%;object-fit:cover}
+.media .nm{font-weight:600;word-break:break-word}
+.media .ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.media .ctl input[type=number]{width:84px;min-height:36px;padding:6px 8px}
+.days{display:flex;gap:6px;flex-wrap:wrap}
+.days button{min-width:52px;padding:9px 10px;border-radius:999px;border:1px solid #d6d1cc;background:#fff;cursor:pointer;font-weight:500}
+.days button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.logoPrev{background:var(--linen);border-radius:14px;padding:18px;display:inline-flex}
+.logoPrev img{max-width:240px;max-height:110px}
+
+/* save bar / modal / toast */
+.savebar{position:fixed;left:248px;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid #e6e1dd;padding:12px 32px;display:flex;gap:10px;align-items:center;z-index:30;transform:translateY(110%);opacity:0;visibility:hidden;pointer-events:none;transition:transform .25s,opacity .25s,visibility 0s .25s}
+.savebar.on{transform:none;opacity:1;visibility:visible;pointer-events:auto;transition:transform .25s,opacity .25s}
+.savebar span{flex:1;font-weight:500}
+.modal{position:fixed;inset:0;background:rgba(20,19,17,.6);z-index:100;display:grid;place-items:center;padding:16px}
+.modal .box{background:#fff;border-radius:20px;padding:22px;max-width:440px;width:100%}
+.modal .box h2{font-size:22px;margin-bottom:6px}
+.modal .box p{color:#5c5953;margin-bottom:14px}
+.modal .btns{display:flex;gap:10px;margin-top:6px}.modal .btns .btn{flex:1}
+.vmodal{align-items:start;overflow:auto}
+.vmodal .vwrap{transform-origin:top left;margin:0 auto}
+#toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,40px);opacity:0;visibility:hidden;background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;z-index:200;transition:transform .25s,opacity .25s,visibility 0s .25s;max-width:calc(100% - 32px);font-weight:500;pointer-events:none}
+#toast.on{transform:translate(-50%,0);opacity:1;visibility:visible;transition:transform .25s,opacity .25s}
+#toast.err{background:#B4483A}
+.loading{position:fixed;top:0;left:0;right:0;height:3px;z-index:300;overflow:hidden;display:none}
+.loading.on{display:block}
+.loading i{position:absolute;height:100%;width:30%;background:var(--olive);animation:ld 1s infinite ease-in-out}
+@keyframes ld{0%{left:-30%}100%{left:100%}}
+
+/* ---------- tablet / phone ---------- */
+@media (max-width: 960px){
+  .side{display:none}
+  .main{margin-left:0;padding:76px 16px calc(96px + env(safe-area-inset-bottom))}
+  .mtop{display:flex;position:fixed;top:0;left:0;right:0;height:60px;background:var(--ink);color:var(--linen);align-items:center;gap:10px;padding:0 14px;z-index:20;padding-top:env(safe-area-inset-top)}
+  .mtop span{background:var(--linen);border-radius:9px;padding:4px 6px;display:flex}
+  .mtop img{height:28px}
+  .mtop b{flex:1;font:500 18px var(--serif)}
+  .mtop button{background:none;border:0;color:var(--linen);padding:8px;cursor:pointer}
+  .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #e6e1dd;z-index:25;padding-bottom:env(safe-area-inset-bottom)}
+  .bnav button{flex:1;border:0;background:none;padding:9px 2px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:#77736b;cursor:pointer}
+  .bnav button svg{width:22px;height:22px}
+  .bnav button.on{color:var(--ink)}
+  .bnav button.on svg{color:var(--olive)}
+  .top h1{font-size:26px}
+  .g2,.g3{grid-template-columns:1fr}
+  .savebar{left:0;padding:12px 16px;bottom:calc(60px + env(safe-area-inset-bottom))}
+  #toast{bottom:calc(84px + env(safe-area-inset-bottom))}
+}
+@media (max-width: 760px){
+  .tblWrap{display:none}.vcards{display:block}
+  .card{padding:16px;border-radius:16px}
+  .prize{grid-template-columns:1fr}
+  .prize .swc{min-height:60px}
+  .bar{grid-template-columns:100px 1fr 30px}
+  .media{grid-template-columns:60px 1fr}
+  .media .th{width:60px;height:92px}
+  .media .rm{grid-column:1/-1}
+  .kpi b{font-size:26px}
+}
+</style>
+<script src="config.js"></script>
+<script src="assets/common.js"></script>
+</head>
+<body>
+<div class="loading" id="loading"><i></i></div>
+
+<!-- ============ LOGIN ============ -->
+<section id="login" class="hide">
+  <form class="loginBox" id="loginForm">
+    <img src="assets/logo.png" alt="Together &amp; Co.">
+    <h1>Spin &amp; Win Admin</h1>
+    <p class="muted" style="margin-top:6px">Enter your admin PIN</p>
+    <input type="password" id="pin" inputmode="numeric" autocomplete="current-password" maxlength="12">
+    <div class="err" id="loginErr"></div>
+    <button class="btn pri" style="width:100%;margin-top:6px;padding:13px" id="loginBtn">Sign in</button>
+  </form>
+</section>
+
+<!-- ============ APP ============ -->
+<section id="app" class="hide">
+  <aside class="side">
+    <div class="brand"><span><img src="assets/logo.png" alt=""></span><b>Spin &amp; Win<small>Admin</small></b></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="foot"><div id="sideStatus"></div><button id="signOut">Sign out</button></div>
+  </aside>
+  <header class="mtop"><span><img src="assets/logo.png" alt=""></span><b id="mTitle">Spin &amp; Win</b><button id="mRefresh" aria-label="Refresh"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></button></header>
+  <main class="main" id="main"></main>
+  <nav class="bnav" id="bnav"></nav>
+  <div class="savebar" id="savebar"><span id="saveMsg">Unsaved changes</span><button class="btn" id="discard">Discard</button><button class="btn pri" id="saveBtn">Save</button></div>
+</section>
+<div id="toast"></div>
+
+<script src="assets/xlsx.mini.min.js"></script>
+<script>
+(() => {
+"use strict";
+const T = window.TCO, $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s)), esc = T.esc;
+
+/* ================= session ================= */
+const TK = "tco_admin_token";
+let token = ""; try { const t = JSON.parse(localStorage.getItem(TK)); if (t && t.exp > Date.now()) token = t.v; } catch(e){}
+let DATA = null, page = location.hash.slice(1) || "dashboard";
+const ICONS = {
+  dashboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+  vouchers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4z"/><path d="M14 5v14" stroke-dasharray="2 2.5"/></svg>',
+  awards: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/></svg>',
+  slides: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="m3 15 5-5 4 4 3-3 6 6"/><circle cx="16" cy="8.5" r="1.5"/></svg>',
+  settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>'
+};
+const PAGES = [["dashboard","Dashboard"],["vouchers","Vouchers"],["awards","Spin awards"],["slides","Slideshow"],["settings","Settings"]];
+
+/* ================= API ================= */
+let busy = 0;
+const loading = on => { busy += on ? 1 : -1; $("#loading").classList.toggle("on", busy > 0); };
+async function api(type, data, ms){
+  loading(true);
+  try {
+    const r = await T.post(Object.assign({ type, token }, data || {}), ms || 60000);
+    if (r && r.auth === false){ signOut("Your session ended. Please sign in again."); throw new Error("auth"); }
+    if (!r || !r.ok) throw new Error((r && r.error) || "Something went wrong");
+    return r;
+  } catch(e){ if (e.message !== "auth") toast(T.errText(e), true); throw e; }
+  finally { loading(false); }
+}
+function toast(msg, err){ const t = $("#toast"); t.textContent = msg; t.classList.toggle("err", !!err); t.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), err ? 5000 : 2600); }
+function dialog({ title, text, ok = "OK", cancel = "Cancel", danger = false, input = null }){
+  return new Promise(res => {
+    const m = document.createElement("div"); m.className = "modal";
+    m.innerHTML = `<div class="box"><h2>${esc(title)}</h2>${text ? `<p>${esc(text)}</p>` : ""}${input !== null ? `<input type="text" placeholder="${esc(input)}" style="margin-bottom:12px">` : ""}
+      <div class="btns">${cancel ? `<button class="btn" data-v="0">${esc(cancel)}</button>` : ""}<button class="btn ${danger ? "danger" : "pri"}" data-v="1">${esc(ok)}</button></div></div>`;
+    document.body.appendChild(m);
+    const inp = $("input", m); if (inp) setTimeout(() => inp.focus(), 50);
+    const done = v => { m.remove(); res(v); };
+    $$("[data-v]", m).forEach(b => b.onclick = () => done(b.dataset.v === "1" ? (inp ? inp.value : true) : (inp ? null : false)));
+    m.onclick = e => { if (e.target === m) done(inp ? null : false); };
+  });
+}
+
+/* ================= login ================= */
+function showLogin(msg){ $("#app").classList.add("hide"); $("#login").classList.remove("hide"); $("#loginErr").textContent = msg || (T.API ? "" : "Add the web app link to config.js first."); setTimeout(() => $("#pin").focus(), 50); }
+function signOut(msg){ if (token) T.post({ type: "admin.logout", token }).catch(()=>{}); token = ""; localStorage.removeItem(TK); DATA = null; showLogin(msg); }
+$("#loginForm").onsubmit = async e => {
+  e.preventDefault();
+  const btn = $("#loginBtn"); btn.disabled = true; btn.textContent = "Signing in…"; $("#loginErr").textContent = "";
+  try {
+    const r = await T.post({ type: "login", pin: $("#pin").value.trim() }, 30000);
+    if (!r.ok) throw new Error(r.error || "Wrong PIN");
+    token = r.token; localStorage.setItem(TK, JSON.stringify({ v: token, exp: Date.now() + 5.5 * 3600e3 }));
+    $("#pin").value = ""; await boot();
+  } catch(err){ $("#loginErr").textContent = T.errText(err); }
+  btn.disabled = false; btn.textContent = "Sign in";
+};
+$("#signOut").onclick = () => signOut();
+
+/* ================= shell ================= */
+function navHTML(){ return PAGES.map(([k, l]) => `<button data-p="${k}" class="${page === k ? "on" : ""}">${ICONS[k]}<span>${l}</span></button>`).join(""); }
+function renderNav(){
+  $("#nav").innerHTML = navHTML(); $("#bnav").innerHTML = navHTML();
+  $$("[data-p]").forEach(b => b.onclick = () => go(b.dataset.p));
+  $("#mTitle").textContent = (PAGES.find(p => p[0] === page) || [,"Spin & Win"])[1];
+}
+async function go(p){
+  if (dirty && !(await dialog({ title: "Leave without saving?", text: "You have unsaved changes on this page.", ok: "Leave", danger: true }))) return;
+  setDirty(false); page = p; history.replaceState(null, "", "#" + p); renderNav(); render(); scrollTo(0, 0);
+}
+async function load(){ const r = await api("admin.data"); DATA = r; DATA.cfg = T.parseSettings(r.settings); DATA.prizes = T.rowsToPrizes(r.awards).prizes; return r; }
+async function boot(){
+  try { await load(); } catch(e){ if (!token) return; showLogin(T.errText(e)); return; }
+  $("#login").classList.add("hide"); $("#app").classList.remove("hide");
+  renderNav(); render();
+}
+$("#mRefresh").onclick = async () => { if (dirty) return toast("Save or discard your changes first"); await load(); render(); toast("Updated"); };
+setInterval(async () => { if (DATA && !dirty && document.visibilityState === "visible" && (page === "dashboard" || page === "vouchers")){ try { await load(); render(true); } catch(e){} } }, 30000);
+
+/* ---------- save bar ---------- */
+let dirty = false, saveFn = null;
+function setDirty(on, fn, msg){ dirty = on; if (fn) saveFn = fn; $("#savebar").classList.toggle("on", on); $("#saveMsg").textContent = msg || "Unsaved changes"; }
+$("#discard").onclick = () => { setDirty(false); render(); };
+$("#saveBtn").onclick = async () => { if (!saveFn) return; const b = $("#saveBtn"); b.disabled = true; try { await saveFn(); } catch(e){} b.disabled = false; };
+
+/* ================= helpers ================= */
+const main = () => $("#main");
+function header(title, sub, actions){ return `<div class="top"><div style="flex:1;min-width:200px"><h1>${title}</h1>${sub ? `<div class="muted" style="margin-top:2px">${sub}</div>` : ""}</div>${actions || ""}</div>`; }
+function seenStatus(){
+  const s = DATA.seen ? Math.round((DATA.serverTime - DATA.seen) / 1000) : null;
+  if (s !== null && s < 40) return `<div class="status ok"><i></i><div><b>Lobby screen online</b><div class="muted">Last check ${s}s ago</div></div></div>`;
+  const when = DATA.seen ? new Date(DATA.seen).toLocaleString("en-GB", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" }) : "never";
+  return `<div class="status bad"><i></i><div><b>Lobby screen offline</b><div class="muted">Last seen ${when}</div></div></div>`;
+}
+const statusOf = g => g.status === "Active" && g.expiry && g.expiry < DATA.today ? "Expired" : (g.status || "Active");
+function prizeFor(g){
+  const p = DATA.prizes.find(p => `${p.title} ${p.sub}`.trim() === String(g.prize).trim()) || DATA.prizes.find(p => String(g.prize).startsWith(p.title));
+  return p ? { prizeTitle: p.title, prizeSub: p.sub, prizeTerm: p.term, prizeColor: p.color } : { prizeTitle: g.prize, prizeSub: "", prizeTerm: "", prizeColor: "#B0AA54" };
+}
+async function setStatus(code, status){
+  const r = await api("admin.status", { code, status });
+  const g = DATA.guests.find(x => x.code === code); if (g){ g.status = r.status; g.redeemedAt = r.redeemedAt; }
+  toast(status === "Redeemed" ? `${code} marked as redeemed` : `${code} set to ${status}`);
+}
+async function redeemFlow(g, onDone){
+  const st = statusOf(g);
+  if (st === "Redeemed"){
+    if (!(await dialog({ title: `Undo redemption of ${g.code}?`, text: "The voucher becomes Active again.", ok: "Make active" }))) return;
+    await setStatus(g.code, "Active");
+  } else {
+    if (st === "Expired" && !(await dialog({ title: "This voucher has expired", text: `It was valid until ${T.niceDate(g.expiry)}. Redeem anyway?`, ok: "Redeem anyway", danger: true }))) return;
+    await setStatus(g.code, "Redeemed");
+  }
+  onDone && onDone();
+}
+function viewVoucher(g){
+  const m = document.createElement("div"); m.className = "modal vmodal";
+  const rec = Object.assign({ code: g.code, first: g.first, last: g.last, day: g.day, time: g.time, expiry: g.expiry, status: statusOf(g) }, prizeFor(g));
+  m.innerHTML = `<div><div class="vwrap">${T.voucherHTML(rec, DATA.logoUrl || "assets/logo.png", DATA.cfg.terms, DATA.cfg.validDays)}</div>
+    <div class="row" style="justify-content:center;margin-top:12px"><button class="btn pri" data-x>Close</button></div></div>`;
+  document.body.appendChild(m);
+  const w = $(".vwrap", m), h = w.firstElementChild.offsetHeight || 1500;
+  const z = Math.min(1, (innerWidth - 32) / 880, (innerHeight - 110) / h);
+  w.style.width = 880 * z + "px"; w.style.height = h * z + "px";
+  w.firstElementChild.style.transform = `scale(${z})`; w.firstElementChild.style.transformOrigin = "top left";
+  m.onclick = e => { if (e.target === m || e.target.hasAttribute("data-x")) m.remove(); };
+}
+function guestActions(g){
+  const st = statusOf(g);
+  return `<button class="btn sm ${st === "Redeemed" ? "" : "pri"}" data-red="${esc(g.code)}">${st === "Redeemed" ? "Undo" : "Redeem"}</button>
+          <button class="btn sm" data-view="${esc(g.code)}">View</button>`;
+}
+function wireGuestActions(root, after){
+  $$("[data-red]", root).forEach(b => b.onclick = () => { const g = DATA.guests.find(x => x.code === b.dataset.red); if (g) redeemFlow(g, after); });
+  $$("[data-view]", root).forEach(b => b.onclick = () => { const g = DATA.guests.find(x => x.code === b.dataset.view); if (g) viewVoucher(g); });
+}
+function guestCard(g){
+  const st = statusOf(g);
+  return `<div class="vc"><div class="h"><span class="code">${esc(g.code)}</span><span class="pill ${st}">${st}</span></div>
+    <div class="n">${esc(g.first)} ${esc(g.last)}</div>
+    <div class="d">${esc(g.prize)}</div>
+    <div class="d">Issued ${T.niceDate(g.day)} ${esc(String(g.time).slice(0,5))} · valid until ${T.niceDate(g.expiry)}</div>
+    <div class="d">${esc(g.mobile)} · ${esc(g.email)}</div>
+    <div class="a">${guestActions(g)}</div></div>`;
+}
+
+/* ================= pages ================= */
+function render(soft){
+  if (!DATA) return;
+  const fn = { dashboard: pDashboard, vouchers: pVouchers, awards: pAwards, slides: pSlides, settings: pSettings }[page] || pDashboard;
+  fn(soft);
+  $("#sideStatus").innerHTML = DATA.seen && (DATA.serverTime - DATA.seen) < 40000 ? "● Screen online" : "○ Screen offline";
+}
+
+/* ---------- Dashboard ---------- */
+function pDashboard(soft){
+  const G = DATA.guests, t = DATA.today;
+  const todayG = G.filter(g => g.day === t), red = G.filter(g => statusOf(g) === "Redeemed");
+  const redToday = red.filter(g => String(g.redeemedAt).startsWith(t)).length;
+  const spinsToday = Object.values(DATA.spinsToday).reduce((a, b) => a + b, 0);
+  const res = Object.entries(DATA.spinsToday).sort((a, b) => b[1] - a[1]), max = Math.max(1, ...res.map(r => r[1]));
+  const colorOf = title => { const p = DATA.prizes.find(p => p.title === title); return p ? p.color : "#B0AA54"; };
+  const q = soft ? ($("#qCode") || {}).value || "" : "";
+  main().innerHTML = header("Dashboard", T.niceDate(t, true)) + `
+    <div class="kpis">
+      <div class="kpi olive"><b>${spinsToday}</b><span>Spins today</span></div>
+      <div class="kpi"><b>${todayG.length}</b><span>Vouchers today</span></div>
+      <div class="kpi"><b>${redToday}</b><span>Redeemed today</span></div>
+      <div class="kpi"><b>${G.filter(g => statusOf(g) === "Active").length}</b><span>Active vouchers</span></div>
+      <div class="kpi"><b>${G.length}</b><span>Vouchers total</span></div>
+      <div class="kpi"><b>${G.filter(g => g.optin).length}</b><span>Marketing opt-ins</span></div>
+    </div>
+    <div class="grid g2">
+      <div>
+        <div class="card"><h2>Redeem a voucher</h2><div class="muted">Type the code from the guest's photo, e.g. TC-AB12CD.</div>
+          <form class="qr" id="qForm" style="margin-top:12px"><input type="search" id="qCode" placeholder="TC-" autocomplete="off" value="${esc(q)}"><button class="btn pri">Find</button></form>
+          <div class="qres" id="qRes"></div></div>
+        <div class="card"><h2>Lobby screen</h2>${seenStatus()}
+          <div class="row" style="margin-top:12px"><a class="btn" href="index.html" target="_blank" rel="noopener">Open the screen ↗</a>${DATA.sheetUrl ? `<a class="btn" href="${esc(DATA.sheetUrl)}" target="_blank" rel="noopener">Google Sheet ↗</a>` : ""}</div></div>
+      </div>
+      <div>
+        <div class="card"><h2>Today's results</h2>
+          ${res.length ? `<div class="bars" style="margin-top:12px">${res.map(([k, v]) => `<div class="bar"><span>${esc(k)}</span><div class="t"><i style="width:${v/max*100}%;background:${colorOf(k)}"></i></div><b>${v}</b></div>`).join("")}</div>` : `<div class="empty">No spins yet today</div>`}</div>
+        <div class="card"><h2>Latest vouchers</h2>${G.length ? G.slice(-5).reverse().map(g => `<div class="qcard" style="margin-top:10px"><div class="who"><b>${esc(g.first)} ${esc(g.last)}</b><div class="muted">${esc(g.code)} · ${esc(g.prize)}</div></div><span class="pill ${statusOf(g)}">${statusOf(g)}</span></div>`).join("") : `<div class="empty">No vouchers yet</div>`}</div>
+      </div>
+    </div>`;
+  const find = () => {
+    const v = $("#qCode").value.trim().toUpperCase().replace(/\s+/g, ""), out = $("#qRes");
+    if (!v){ out.innerHTML = ""; return; }
+    const code = v.startsWith("TC-") ? v : v.startsWith("TC") ? "TC-" + v.slice(2) : "TC-" + v;
+    const hits = DATA.guests.filter(g => g.code === code || g.code.includes(v));
+    out.innerHTML = hits.length ? hits.slice(0, 5).map(g => `<div class="qcard" style="margin-top:8px"><div class="who"><b>${esc(g.first)} ${esc(g.last)}</b><div class="muted">${esc(g.code)} · ${esc(g.prize)}</div><div class="muted">Valid until ${T.niceDate(g.expiry)}</div></div><span class="pill ${statusOf(g)}">${statusOf(g)}</span><div class="row">${guestActions(g)}</div></div>`).join("")
+      : `<div class="note">No voucher found for “${esc(v)}”. Check the code on the guest's photo.</div>`;
+    wireGuestActions(out, () => { find(); pDashboardKpisOnly(); });
+  };
+  const pDashboardKpisOnly = () => { const keep = $("#qCode").value; pDashboard(true); $("#qCode").value = keep; find(); };
+  $("#qForm").onsubmit = e => { e.preventDefault(); find(); };
+  if (q) find();
+}
+
+/* ---------- Vouchers ---------- */
+let vf = { q: "", st: "All", from: "", to: "" };
+function pVouchers(){
+  const list = DATA.guests.slice().reverse().filter(g => {
+    const st = statusOf(g), q = vf.q.toLowerCase();
+    if (vf.st !== "All" && st !== vf.st) return false;
+    if (vf.from && g.day < vf.from) return false;
+    if (vf.to && g.day > vf.to) return false;
+    return !q || [g.code, g.first, g.last, g.email, g.mobile, g.prize].join(" ").toLowerCase().includes(q);
+  });
+  const shown = list.slice(0, 400);
+  main().innerHTML = header("Vouchers", `${list.length} voucher${list.length === 1 ? "" : "s"}`, `<button class="btn olive" id="xls">⬇ Excel</button>`) + `
+    <div class="card">
+      <div class="grid g3" style="gap:10px">
+        <input type="search" id="vq" placeholder="Search name, email, mobile or code" value="${esc(vf.q)}">
+        <div class="dates"><input type="date" id="vfrom" value="${vf.from}" aria-label="From"><span class="muted">to</span><input type="date" id="vto" value="${vf.to}" aria-label="To"></div>
+        <div class="chips" id="vst">${["All","Active","Redeemed","Expired"].map(s => `<button data-s="${s}" class="${vf.st === s ? "on" : ""}">${s}</button>`).join("")}</div>
+      </div>
+    </div>
+    <div class="card" style="padding:8px 8px">
+      <div class="tblWrap"><table class="tbl"><thead><tr><th>Code</th><th>Status</th><th>Issued</th><th>Guest</th><th>Mobile</th><th>Email</th><th>Prize</th><th>Valid until</th><th>Opt-in</th><th></th></tr></thead><tbody>
+      ${shown.map(g => `<tr><td><b>${esc(g.code)}</b></td><td><span class="pill ${statusOf(g)}">${statusOf(g)}</span></td><td>${T.niceDate(g.day)}<div class="muted">${esc(String(g.time).slice(0,5))}</div></td>
+        <td>${esc(g.first)} ${esc(g.last)}</td><td>${esc(g.mobile)}</td><td>${esc(g.email)}</td><td>${esc(g.prize)}</td><td>${T.niceDate(g.expiry)}</td><td>${g.optin ? "Yes" : "No"}</td>
+        <td style="white-space:nowrap">${guestActions(g)}</td></tr>`).join("") || `<tr><td colspan="10" class="empty">No vouchers match</td></tr>`}
+      </tbody></table></div>
+      <div class="vcards">${shown.map(guestCard).join("") || `<div class="empty">No vouchers match</div>`}</div>
+      ${list.length > shown.length ? `<div class="muted" style="padding:10px">Showing the latest ${shown.length}. Narrow the search or export to Excel to see all.</div>` : ""}
+    </div>`;
+  let t; $("#vq").oninput = e => { clearTimeout(t); t = setTimeout(() => { vf.q = e.target.value; const pos = e.target.selectionStart; pVouchers(); const n = $("#vq"); n.focus(); n.setSelectionRange(pos, pos); }, 250); };
+  $("#vfrom").onchange = e => { vf.from = e.target.value; pVouchers(); };
+  $("#vto").onchange = e => { vf.to = e.target.value; pVouchers(); };
+  $$("#vst button").forEach(b => b.onclick = () => { vf.st = b.dataset.s; pVouchers(); });
+  wireGuestActions(main(), () => pVouchers());
+  $("#xls").onclick = exportExcel;
+}
+async function exportExcel(){
+  const r = await api("admin.export", { from: vf.from, to: vf.to }, 90000);
+  const s1 = r.guests.map(g => ({ "Voucher Code": g.code, "Date": g.day, "Time": String(g.time).slice(0,5), "First Name": g.first, "Last Name": g.last, "Mobile": g.mobile,
+    "Email": g.email, "Prize": g.prize, "Valid Until": g.expiry, "Status": statusOf(g), "Redeemed On": g.redeemedAt, "Marketing Opt-in": g.optin ? "Yes" : "No" }));
+  const s2 = r.spins.map(s => ({ "Date": s.day, "Time": s.time, "Result": s.result, "Bonus Spin": s.bonus }));
+  const wb = XLSX.utils.book_new();
+  const w1 = XLSX.utils.json_to_sheet(s1.length ? s1 : [{ "Voucher Code": "No records" }]); w1["!cols"] = [12,11,7,16,16,17,30,34,11,10,17,16].map(w => ({ wch: w }));
+  XLSX.utils.book_append_sheet(wb, w1, "Guests");
+  const w2 = XLSX.utils.json_to_sheet(s2.length ? s2 : [{ "Date": "No spins" }]); w2["!cols"] = [11,9,24,11].map(w => ({ wch: w }));
+  XLSX.utils.book_append_sheet(wb, w2, "Spin Log");
+  XLSX.writeFile(wb, `TogetherCo_SpinWin_${vf.from || "start"}_to_${vf.to || DATA.today}.xlsx`);
+}
+
+/* ---------- Spin awards ---------- */
+let AW = null;
+function pAwards(){
+  if (!dirty || !AW) AW = JSON.parse(JSON.stringify(DATA.prizes));
+  const P = AW, live = P.filter(p => p.active !== false && (p.slices|0) > 0), tot = live.reduce((s,p) => s + (+p.odds||0), 0) || 1;
+  const slices = live.reduce((s,p) => s + (p.slices|0), 0), err = T.validatePrizes(P);
+  main().innerHTML = header("Spin awards", "Saved to the Spin awards tab · the screen updates within a few seconds", `<button class="btn" id="addAw">+ Add award</button>`) + `
+    <div class="card"><div class="wprev"><canvas id="wheelPrev" width="480" height="480"></canvas>
+      <div style="flex:1;min-width:220px"><div><b>${slices}</b> slices on the wheel <span class="muted">(4–20)</span></div>
+        <h3>Win chances</h3>${live.map(p => `<div class="bar" style="grid-template-columns:120px 1fr 52px"><span>${esc(p.title)}</span><div class="t"><i style="width:${(+p.odds||0)/tot*100}%;background:${p.color}"></i></div><b>${Math.round((+p.odds||0)/tot*1000)/10}%</b></div>`).join("")}
+        ${err ? `<div class="note">${esc(err)}</div>` : ""}</div></div></div>
+    <div class="card" id="plist">${P.map((p, i) => `
+      <div class="prize ${p.active === false ? "off" : ""}" data-i="${i}">
+        <div class="swc" style="background:${p.color};color:${T.inkFor(p.color)}">${esc((p.w1||"").toUpperCase())}<small>${esc((p.w2||"").toUpperCase())}</small></div>
+        <div>
+          <div class="grid4">
+            <div><label class="f">Type</label><select data-k="type">${[["win","Prize (voucher)"],["again","Free spin"],["lose","No prize"]].map(([v,l]) => `<option value="${v}" ${p.type===v?"selected":""}>${l}</option>`).join("")}</select></div>
+            <div><label class="f">Wheel line 1</label><input type="text" data-k="w1" maxlength="16" value="${esc(p.w1)}"></div>
+            <div><label class="f">Wheel line 2</label><input type="text" data-k="w2" maxlength="20" value="${esc(p.w2)}"></div>
+            <div><label class="f">Title</label><input type="text" data-k="title" maxlength="24" value="${esc(p.title)}"></div>
+            <div><label class="f">Subtitle</label><input type="text" data-k="sub" maxlength="44" value="${esc(p.sub)}"></div>
+            <div><label class="f">Slices</label><select data-k="slices">${[0,1,2,3,4].map(n => `<option ${(p.slices|0)===n?"selected":""}>${n}</option>`).join("")}</select></div>
+            <div><label class="f">Chance (weight)</label><input type="number" min="0" max="1000" data-k="odds" value="${+p.odds||0}"></div>
+          </div>
+          ${p.type === "win" ? `<label class="f">Voucher condition</label><input type="text" data-k="term" maxlength="200" value="${esc(p.term||"")}">` : ""}
+          <div class="colors">${T.PALETTE.map(([n,v]) => `<button class="c ${p.color.toLowerCase()===v.toLowerCase()?"on":""}" title="${n}" data-color="${v}" style="background:${v}"></button>`).join("")}
+            <input type="color" data-k="color" value="${p.color}" title="Custom colour">
+            <span style="flex:1"></span>
+            <label class="sw"><input type="checkbox" data-k="active" ${p.active !== false ? "checked" : ""}>On wheel</label>
+            <button class="btn sm" data-up="${i}" ${i===0?"disabled":""}>↑</button><button class="btn sm" data-down="${i}" ${i===P.length-1?"disabled":""}>↓</button>
+            <button class="btn sm danger" data-del="${i}">Remove</button>
+          </div>
+        </div>
+      </div>`).join("")}</div>`;
+  T.drawWheel($("#wheelPrev"), P, T.buildSegments(P));
+  const changed = () => setDirty(true, saveAwards);
+  $$(".prize").forEach(row => {
+    const p = P[+row.dataset.i];
+    $$("[data-k]", row).forEach(inp => {
+      const k = inp.dataset.k, isText = inp.tagName === "INPUT" && (inp.type === "text" || inp.type === "number");
+      inp.addEventListener(isText ? "input" : "change", () => {
+        if (k === "active") p.active = inp.checked; else p[k] = (k === "slices" || k === "odds") ? Math.max(0, +inp.value || 0) : inp.value;
+        changed();
+        if (!isText) pAwards();
+        else { $(".swc", row).innerHTML = `${esc((p.w1||"").toUpperCase())}<small>${esc((p.w2||"").toUpperCase())}</small>`; T.drawWheel($("#wheelPrev"), P, T.buildSegments(P)); }
+      });
+      if (isText) inp.addEventListener("change", () => { const y = scrollY; pAwards(); scrollTo(0, y); });
+    });
+    $$("[data-color]", row).forEach(b => b.onclick = () => { p.color = b.dataset.color; changed(); pAwards(); });
+  });
+  $$("[data-del]").forEach(b => b.onclick = async () => {
+    if (!(await dialog({ title: `Remove "${P[+b.dataset.del].title}"?`, text: "It's removed when you press Save. To hide it for now, switch off \"On wheel\" instead.", ok: "Remove", danger: true }))) return;
+    P.splice(+b.dataset.del, 1); changed(); pAwards();
+  });
+  $$("[data-up]").forEach(b => b.onclick = () => { const i = +b.dataset.up; [P[i-1], P[i]] = [P[i], P[i-1]]; changed(); pAwards(); });
+  $$("[data-down]").forEach(b => b.onclick = () => { const i = +b.dataset.down; [P[i+1], P[i]] = [P[i], P[i+1]]; changed(); pAwards(); });
+  $("#addAw").onclick = () => {
+    if (P.length >= 12) return toast("Up to 12 awards", true);
+    P.push({ id: "new" + Date.now(), name: "New prize", type: "win", w1: "NEW PRIZE", w2: "", title: "New prize", sub: "", color: "#D6CFBC", odds: 10, slices: 1, term: "", active: true });
+    changed(); pAwards(); setTimeout(() => $$(".prize").pop().scrollIntoView({ behavior: "smooth", block: "center" }), 50);
+  };
+}
+async function saveAwards(){
+  const err = T.validatePrizes(AW); if (err) return toast(err, true);
+  AW.forEach(p => { if (!p.name || p.name === "New prize") p.name = p.title; });
+  await api("admin.awards", { awards: T.prizesToRows(AW) });
+  setDirty(false); await load(); AW = null; render(); toast("Spin awards saved — the screen updates in a few seconds");
+}
+
+/* ---------- Slideshow & schedule ---------- */
+let SL = null, SC = null;
+function pSlides(){
+  if (!dirty || !SL){ SL = JSON.parse(JSON.stringify(DATA.slides)); SC = JSON.parse(JSON.stringify(DATA.cfg)); }
+  const sc = SC.schedule, ss = SC.slideshow, order = [1,2,3,4,5,6,0], live = T.inSchedule(sc);
+  main().innerHTML = header("Slideshow & schedule", "Photos and videos play on the screen's home page · tap the screen 3 times to open Spin & Win") + `
+    <div class="grid g2">
+      <div class="card"><h2>When is Spin &amp; Win available?</h2>
+        <div class="muted">Outside these times the screen only plays the slideshow.</div>
+        <label class="sw" style="margin-top:14px"><input type="checkbox" id="scOn" ${sc.enabled ? "checked" : ""}>Only on the days and times below</label>
+        <div id="scBox" style="${sc.enabled ? "" : "opacity:.45;pointer-events:none"}">
+          <label class="f">Days</label><div class="days">${order.map(i => `<button data-day="${i}" class="${sc.days[i] ? "on" : ""}">${T.DAY_NAMES[i]}</button>`).join("")}</div>
+          <div class="grid g2" style="gap:12px"><div><label class="f">From</label><input type="time" id="scFrom" value="${sc.from}"></div><div><label class="f">To</label><input type="time" id="scTo" value="${sc.to}"></div></div>
+          <div class="muted" style="margin-top:6px">Same From and To = all day. A To earlier than From runs past midnight.</div>
+        </div>
+        <div class="status ${live ? "ok" : "bad"}" style="margin-top:14px"><i></i><div>Spin &amp; Win: <b>${esc(T.scheduleText(sc))}</b> — ${live ? "available now" : "not available right now"}</div></div>
+      </div>
+      <div class="card"><h2>Slideshow settings</h2>
+        <div class="grid g2" style="gap:0 12px">
+          <div><label class="f">Each photo shows for (s)</label><input type="number" min="2" max="120" id="ssImg" value="${ss.imageSeconds}"></div>
+          <div><label class="f">Photo fit</label><select id="ssFit"><option value="cover" ${ss.fit !== "contain" ? "selected" : ""}>Fill the screen</option><option value="contain" ${ss.fit === "contain" ? "selected" : ""}>Show whole photo</option></select></div>
+          <div><label class="f">Show the wheel after every … items</label><input type="number" min="0" max="50" id="ssEvery" value="${ss.wheelEvery}"></div>
+          <div><label class="f">…for (seconds)</label><input type="number" min="5" max="300" id="ssWs" value="${ss.wheelSeconds}"></div>
+        </div>
+        <label class="sw" style="margin-top:14px"><input type="checkbox" id="ssSound" ${ss.sound ? "checked" : ""}>Play video sound</label>
+        <div class="muted" style="margin-top:8px">Videos always play to the end. 0 = never show the wheel between slides.</div>
+      </div>
+    </div>
+    <div class="card"><div class="row"><h2 style="flex:1">Photos &amp; videos <span class="muted" style="font:400 14px var(--sans)">(${SL.length})</span></h2>
+        <label class="btn pri" style="cursor:pointer">+ Upload<input type="file" id="up" accept="image/*,video/*" multiple hidden></label>
+        ${DATA.folderUrl ? `<a class="btn" href="${esc(DATA.folderUrl)}" target="_blank" rel="noopener">Drive folder ↗</a>` : ""}</div>
+      <div class="muted">Upload photos and short videos (up to 25 MB) here. Larger videos (up to 45 MB): add them in the Drive folder. Portrait 1080 × 1920, MP4 / JPG / PNG.</div>
+      <div id="upProg"></div>
+      <div id="mlist">${SL.length ? "" : `<div class="empty">No photos or videos yet — the Spin &amp; Win wheel is the home screen.</div>`}</div>
+    </div>`;
+  const list = $("#mlist");
+  SL.forEach((m, i) => {
+    const row = document.createElement("div"); row.className = "media" + (m.show === "No" ? " off" : "");
+    row.innerHTML = `<div class="th" data-th="${esc(m.id)}">${m.type === "Video" ? "VIDEO" : "PHOTO"}</div>
+      <div><div class="nm">${i + 1}. ${esc(m.name)}</div><div class="muted">${m.type === "Video" ? "Video · plays to the end" : "Photo"}</div>
+        <div class="ctl">${m.type === "Video" ? "" : `<span class="muted">Seconds</span><input type="number" min="2" max="120" placeholder="${ss.imageSeconds}" value="${m.seconds || ""}" data-sec="${i}">`}
+          <label class="sw"><input type="checkbox" data-show="${i}" ${m.show !== "No" ? "checked" : ""}>Show</label>
+          <button class="btn sm" data-mup="${i}" ${i === 0 ? "disabled" : ""}>↑</button><button class="btn sm" data-mdn="${i}" ${i === SL.length - 1 ? "disabled" : ""}>↓</button></div></div>
+      <button class="btn sm danger rm" data-mdel="${i}">Remove</button>`;
+    list.appendChild(row);
+  });
+  loadThumbs();
+  const changed = () => setDirty(true, saveSlides);
+  $("#scOn").onchange = e => { sc.enabled = e.target.checked; changed(); pSlides(); };
+  $$("[data-day]").forEach(b => b.onclick = () => { sc.days[+b.dataset.day] = !sc.days[+b.dataset.day]; changed(); pSlides(); });
+  $("#scFrom").onchange = e => { sc.from = e.target.value || "00:00"; changed(); pSlides(); };
+  $("#scTo").onchange = e => { sc.to = e.target.value || "00:00"; changed(); pSlides(); };
+  const numIn = (id, k, lo, hi) => $(id).onchange = e => { ss[k] = Math.max(lo, Math.min(hi, +e.target.value || 0)); changed(); };
+  numIn("#ssImg", "imageSeconds", 2, 120); numIn("#ssEvery", "wheelEvery", 0, 50); numIn("#ssWs", "wheelSeconds", 5, 300);
+  $("#ssFit").onchange = e => { ss.fit = e.target.value; changed(); };
+  $("#ssSound").onchange = e => { ss.sound = e.target.checked; changed(); };
+  $$("[data-sec]").forEach(inp => inp.onchange = () => { SL[+inp.dataset.sec].seconds = inp.value ? Math.max(2, Math.min(120, +inp.value)) : ""; changed(); });
+  $$("[data-show]").forEach(c => c.onchange = () => { SL[+c.dataset.show].show = c.checked ? "Yes" : "No"; changed(); c.closest(".media").classList.toggle("off", !c.checked); });
+  $$("[data-mup]").forEach(b => b.onclick = () => { const i = +b.dataset.mup; [SL[i-1], SL[i]] = [SL[i], SL[i-1]]; changed(); pSlides(); });
+  $$("[data-mdn]").forEach(b => b.onclick = () => { const i = +b.dataset.mdn; [SL[i+1], SL[i]] = [SL[i], SL[i+1]]; changed(); pSlides(); });
+  $$("[data-mdel]").forEach(b => b.onclick = async () => {
+    const m = SL[+b.dataset.mdel];
+    if (!(await dialog({ title: `Remove "${m.name}"?`, text: "It's moved to the Drive bin and disappears from the screen.", ok: "Remove", danger: true }))) return;
+    await api("admin.remove", { id: m.id }); await load(); setDirty(false); SL = null; pSlides(); toast("Removed");
+  });
+  $("#up").onchange = e => uploadFiles(Array.from(e.target.files || []));
+}
+const thumbCache = {};
+async function loadThumbs(){
+  for (const el of $$("[data-th]")){
+    const id = el.dataset.th;
+    if (thumbCache[id] === undefined){
+      try { const r = await T.post({ type: "admin.thumb", token, id }, 30000); thumbCache[id] = r && r.ok && r.data ? `data:${r.mime};base64,${r.data}` : ""; } catch(e){ thumbCache[id] = ""; }
+    }
+    const live = document.querySelector(`[data-th="${CSS.escape(id)}"]`);
+    if (live && thumbCache[id]) live.innerHTML = `<img src="${thumbCache[id]}" alt="">`;
+  }
+}
+async function saveSlides(){
+  const rows = SL.map((m, i) => ({ id: m.id, order: i + 1, seconds: m.seconds, show: m.show }));
+  await api("admin.settings", { settings: T.settingsToRaw(SC) });
+  if (rows.length) await api("admin.slides", { rows });
+  setDirty(false); await load(); SL = null; render(); toast("Saved — the screen updates in a few seconds");
+}
+async function shrink(file){
+  if (!/^image\//.test(file.type) || /gif|svg/.test(file.type)) return file;
+  try {
+    const u = URL.createObjectURL(file), img = new Image(); img.src = u; await img.decode();
+    const k = Math.min(1, 2160 / Math.max(img.naturalWidth, img.naturalHeight));
+    if (k >= 1 && file.size < 3 * 1048576){ URL.revokeObjectURL(u); return file; }
+    const c = document.createElement("canvas"); c.width = Math.round(img.naturalWidth*k); c.height = Math.round(img.naturalHeight*k);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u);
+    const b = await new Promise(r => c.toBlob(r, "image/jpeg", .9));
+    return new File([b], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
+  } catch(e){ return file; }
+}
+const toB64 = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.onerror = rej; r.readAsDataURL(f); });
+async function uploadFiles(files, kind){
+  if (!files.length) return;
+  if (dirty && kind !== "logo"){ toast("Save or discard your changes first", true); return; }
+  const prog = $("#upProg") || $("#logoProg"); const failed = [];
+  for (let i = 0; i < files.length; i++){
+    let f = files[i];
+    if (prog) prog.innerHTML = `<div class="note">Uploading ${i + 1} of ${files.length}: ${esc(f.name)}… please keep this page open.</div>`;
+    if (!/^(image|video)\//.test(f.type)){ failed.push(`${f.name} (not a photo or video)`); continue; }
+    if (/heic|heif/i.test(f.type) || /\.hei[cf]$/i.test(f.name)){ failed.push(`${f.name} (iPhone HEIC — save as JPG)`); continue; }
+    f = await shrink(f);
+    if (f.size > 25 * 1048576){ failed.push(`${f.name} (over 25 MB — add it in the Drive folder)`); continue; }
+    try { await api("admin.upload", { kind: kind || "slide", name: f.name, mime: f.type, data: await toB64(f) }, 180000); }
+    catch(e){ failed.push(`${f.name} (upload failed)`); }
+  }
+  if (prog) prog.innerHTML = "";
+  await load(); SL = null; render();
+  if (failed.length) dialog({ title: "Some files weren't added", text: failed.join(" · "), cancel: null }); else toast(kind === "logo" ? "Logo updated" : "Uploaded — the screen downloads it within a minute");
+}
+
+/* ---------- Settings ---------- */
+let SE = null;
+function pSettings(){
+  if (!dirty || !SE) SE = JSON.parse(JSON.stringify(DATA.cfg));
+  const c = SE, logo = DATA.logoUrl || "assets/logo.png";
+  main().innerHTML = header("Settings", "Changes apply to the lobby screen within a few seconds of saving") + `
+    <div class="grid g2">
+      <div class="card"><h2>Screen behaviour</h2>
+        <div class="grid g2" style="gap:0 12px">
+          <div><label class="f">Spin length (s)</label><input type="number" min="3" max="15" data-n="spinSeconds" value="${c.spinSeconds}"></div>
+          <div><label class="f">Standby speed (° per s)</label><input type="number" min="0" max="60" data-n="standbySpeed" value="${c.standbySpeed}"></div>
+          <div><label class="f">Back to home after no touch (s)</label><input type="number" min="5" max="300" data-n="idleSeconds" value="${c.idleSeconds}"></div>
+          <div><label class="f">Voucher stays on screen (s)</label><input type="number" min="15" max="600" data-n="voucherSeconds" value="${c.voucherSeconds}"></div>
+          <div><label class="f">Voucher valid for (days)</label><input type="number" min="1" max="365" data-n="validDays" value="${c.validDays}"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+          <label class="sw"><input type="checkbox" data-b="onePerDay" ${c.onePerDay ? "checked" : ""}>One voucher per email per day</label>
+          <label class="sw"><input type="checkbox" data-b="sound" ${c.sound ? "checked" : ""}>Sound effects</label>
+        </div>
+      </div>
+      <div class="card"><h2>Logo</h2><div class="muted">Shown on the screen and on vouchers. PNG with transparent background works best.</div>
+        <div class="row" style="margin-top:12px"><span class="logoPrev"><img src="${esc(logo)}" alt=""></span></div>
+        <div id="logoProg"></div>
+        <div class="row" style="margin-top:12px"><label class="btn pri" style="cursor:pointer">Upload new logo<input type="file" id="logoFile" accept="image/png,image/jpeg,image/webp" hidden></label>${DATA.logo ? `<button class="btn" id="logoReset">Use original logo</button>` : ""}</div>
+        <h3>Admin PIN</h3>
+        <div class="row" style="flex-wrap:nowrap"><input type="password" id="newPin" inputmode="numeric" maxlength="12" placeholder="New PIN (4–12 digits)"><button class="btn" id="pinBtn">Change</button></div>
+        <h3>Links</h3>
+        <div class="row"><a class="btn" href="index.html" target="_blank" rel="noopener">Lobby screen ↗</a>${DATA.sheetUrl ? `<a class="btn" href="${esc(DATA.sheetUrl)}" target="_blank" rel="noopener">Google Sheet ↗</a>` : ""}${DATA.folderUrl ? `<a class="btn" href="${esc(DATA.folderUrl)}" target="_blank" rel="noopener">Drive folder ↗</a>` : ""}</div>
+      </div>
+    </div>
+    <div class="card"><h2>Screen text</h2><div class="muted">Use {days} for the voucher validity and *word* for olive italic.</div>
+      <div class="grid g2" style="gap:0 16px">${T.TEXT_KEYS.map(([k, l]) => `<div><label class="f">${esc(l)}</label><input type="text" data-tx="${k}" maxlength="200" value="${esc(c.text[k])}"></div>`).join("")}</div>
+    </div>
+    <div class="card"><h2>Voucher terms &amp; conditions</h2><div class="muted">One condition per line, printed on every voucher after the award's own condition.</div>
+      <textarea id="terms" style="margin-top:10px">${esc(c.terms.join("\n"))}</textarea>
+    </div>
+    <div class="row" style="justify-content:center;margin-top:10px"><button class="btn" id="signOut2">Sign out</button></div>`;
+  const changed = () => setDirty(true, saveSettings);
+  $$("[data-n]").forEach(i => i.oninput = () => { c[i.dataset.n] = +i.value || 0; changed(); });
+  $$("[data-b]").forEach(i => i.onchange = () => { c[i.dataset.b] = i.checked; changed(); });
+  $$("[data-tx]").forEach(i => i.oninput = () => { c.text[i.dataset.tx] = i.value; changed(); });
+  $("#terms").oninput = e => { c.terms = e.target.value.split("\n").map(s => s.trim()).filter(Boolean); changed(); };
+  $("#logoFile").onchange = e => uploadFiles(Array.from(e.target.files || []), "logo");
+  if ($("#logoReset")) $("#logoReset").onclick = async () => { if (!(await dialog({ title: "Use the original Together & Co. logo?", ok: "Reset" }))) return; await api("admin.logoReset"); await load(); render(); toast("Original logo restored"); };
+  $("#pinBtn").onclick = async () => {
+    const p = $("#newPin").value.trim(); if (!/^\d{4,12}$/.test(p)) return toast("PIN must be 4–12 digits", true);
+    if (!(await dialog({ title: "Change the admin PIN?", text: "Everyone signing in to admin will need the new PIN.", ok: "Change PIN" }))) return;
+    await api("admin.pin", { pin: p }); $("#newPin").value = ""; toast("PIN changed");
+  };
+  $("#signOut2").onclick = () => signOut();
+}
+async function saveSettings(){
+  if (!SE.text.title.trim()) return toast("The main title can't be empty", true);
+  const s = Object.assign({}, SE, { slideshow: DATA.cfg.slideshow, schedule: DATA.cfg.schedule });
+  await api("admin.settings", { settings: T.settingsToRaw(s) });
+  setDirty(false); await load(); SE = null; render(); toast("Settings saved");
+}
+
+/* ================= logo preview (from Drive) ================= */
+const logoCache = { key: "", url: "" };
+const _load = load;
+load = async function(){
+  const r = await _load();
+  if (r.logo){
+    const key = r.logo.id + ":" + r.logo.updated;
+    if (logoCache.key !== key){
+      try { const m = await T.get({ type: "media", id: r.logo.id, part: 0 }, 30000); if (m.ok){ logoCache.key = key; logoCache.url = `data:${m.mime};base64,${m.data}`; } } catch(e){}
+    }
+    DATA.logoUrl = logoCache.key === key ? logoCache.url : "";
+  } else DATA.logoUrl = "";
+  return r;
+};
+
+/* ================= start ================= */
+if (token) boot(); else showLogin();
+addEventListener("hashchange", () => { const p = location.hash.slice(1); if (p && p !== page) go(p); });
+addEventListener("beforeunload", e => { if (dirty){ e.preventDefault(); e.returnValue = ""; } });
+})();
+</script>
+</body>
+</html>
